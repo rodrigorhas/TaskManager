@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp" ng-controller="mainController">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<title>New Project</title>
+	
+	<script src="components/webcomponentsjs/webcomponents.js"></script>
+	<link rel="import" href="components/polymer/polymer.html">
+	<link rel="import" href="components/font-roboto/roboto.html">
+	<link rel="import" href="components/paper-elements/paper-elements.html">
+	<link rel="import" href="components/core-scaffold/core-scaffold.html">
+	<link rel="import" href="components/core-toolbar/core-toolbar.html">
+	<link rel="import" href="components/core-menu/core-menu.html">
+	<link rel="import" href="components/core-item/core-item.html">
+	<link rel="import" href="components/core-animated-pages/core-animated-pages.html">
+	<link rel="import" href="components/core-overlay/core-overlay.html">
+	<link rel="import" href="components/core-header-panel/core-header-panel.html">
+	<link rel="import" href="components/core-transition/core-transition.html">
+	<link rel="import" href="components/paper-toast/paper-toast.html">
+	<link rel="import" href="components/core-icons/social-icons.html">
+	<link rel="import" href="components/core-icons/communication-icons.html">
+	<!-- <link rel="import" href="components/paper-fab/paper-fab.html"> -->
+	
+	<script src="js/jquery.min.js"></script>
+	<script src="js/angular.min.js"></script>
+	<script src="components/ng-polymer-elements/ng-polymer-elements.min.js"></script>
+	<script src="http://192.168.0.56:8081/socket.io/socket.io.js"></script>
+	<script src="js/app.js"></script>
+	
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/0.8.2/angular-material.min.css">
+	<link rel="stylesheet" href="css/style.css">
+</head>
+<body unresolved fullbleed layout vertical>
+
+	  <div class="load-overlay">
+			<div class="loader">
+				<md-progress-circular class="fix" md-mode="indeterminate"></md-progress-circular>
+				<span>Carregando</span>
+			</div>
+	  </div>
+
+	<core-scaffold>
+	  <core-header-panel navigation flex mode="seamed">
+	    <core-toolbar class="core-toolbar-style">Menu</core-toolbar>
+	    <core-menu>
+	      <core-item ng-repeat="page in pages" ng-click="changePage($event)" page="{{page.id}}" icon="{{page.icon}}" label="{{page.title}}">
+	      </core-item>
+	    </core-menu>
+	  </core-header-panel>
+	  <div tool>
+	  	{{activePage.title}}
+	  	<div class="paper-icon-group right">
+		  	<paper-icon-button icon="add" ng-click="createTicket()"></paper-icon-button>
+		  	<paper-icon-button icon="filter-list" ng-click="toggleFilterForm()"></paper-icon-button>
+	  	</div>
+	  </div>
+	  <div fit>
+
+		<paper-toast text="" duration="7000" autoCloseDisabled="true" ng-click="discardDraft($event)">
+			<div style="color: yellow;">desfazer</div>
+		</paper-toast>
+
+		<!-- <paper-fab icon="add"></paper-fab> -->
+
+		  <core-animated-pages transitions="cross-fade">
+
+				<section id="page1">
+			  	<div class="container" flex cross-fade>
+						<card flex ng-repeat="item in data | filter: {unread: 1, deleted: 0}" ng-class="{fullscreen: fs, done: item.done == 1}">
+							<card-header>
+									{{item.group}}
+									<div class="button-group">
+										<paper-icon-button icon="fullscreen" ng-click="fs = !fs"></paper-icon-button>
+										<paper-checkbox  ng-checked="{{transform(item.done)}}" ng-click="toggleDoneState(item.id)"></paper-checkbox>
+										<paper-menu-button>
+										  <paper-icon-button icon="more-vert" noink></paper-icon-button>
+										  <paper-dropdown halign="right" class="dropdown">
+										    <core-menu class="menu">
+										      <paper-item>Arquivar</paper-item>
+										      <paper-item ng-click="deleteCard(item.id, $index)">Deletar</paper-item>
+										      <paper-item>Editar</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 1">Marcar como lido</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 0">Marcar como não lido</paper-item>
+										    </core-menu>
+										  </paper-dropdown>
+										</paper-menu-button>
+									</div>
+							</card-header>
+							<card-body>
+								<p>Hi man.</p>
+								<p> {{item.note}} </p>
+							</card-body>
+							<card-footer>
+								<small>
+									<i class="text-muted" style="top: 8px;position: relative;">Enviado por <u>{{item.name}}</u> às {{item.date | date: 'HH:mm'}}h do dia {{item.date | date: 'dd/MM/yyyy'}}</i>
+								</small>
+							</card-footer>
+						</card>
+					</div>
+
+			  </section>
+
+			  <section id="page2">
+			  	<div class="container" flex cross-fade>
+						<card flex ng-repeat="item in data | filter: {deleted: 0}" ng-class="{fullscreen: fs, done: item.done == 1, unread: item.unread == 1 }">
+							<card-header>
+									<div class="title">{{item.group}}</div>
+									<small>
+									<i class="text-muted">Enviado por <u>{{item.name}}</u> às {{item.date | date: 'HH:mm'}}h do dia {{item.date | date: 'dd/MM/yyyy'}}</i>
+									</small>
+									<div class="button-group right">
+										<paper-icon-button icon="fullscreen" ng-click="fs = !fs"></paper-icon-button>
+										<paper-checkbox  ng-checked="{{transform(item.done)}}" ng-click="toggleDoneState(item.id)"></paper-checkbox>
+										<paper-menu-button>
+										  <paper-icon-button icon="more-vert" noink></paper-icon-button>
+										  <paper-dropdown halign="right" class="dropdown">
+										    <core-menu class="menu">7
+										      <paper-item>Arquivar</paper-item>
+										      <paper-item ng-click="deleteCard(item.id, $index, $event)">Deletar</paper-item>
+										      <paper-item>Editar</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 1">Marcar como lido</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 0">Marcar como não lido</paper-item>
+										    </core-menu>
+										  </paper-dropdown>
+										</paper-menu-button>
+									</div>
+							</card-header>
+							<card-body>
+								<p>Hi man.</p>
+								<p> {{item.note}} </p>
+							</card-body>
+							<card-footer>
+								<div class="button-group left">
+									<core-icon-button icon="communication:comment" ng-click="toggleCollapse($event, item.id)"></core-icon-button>{{commentsResult.length}}
+									<core-icon-button icon="star-outline"></core-icon-button>4
+								</div>
+							</card-footer>
+							<card-collapse>
+								<ul class="infinity-list">
+									<li class="list-item" ng-repeat="comment in commentsResult = (comments | filter: {ticketReference: item.id} | orderBy: 'time':false)">
+										<div class="top">
+											<b>{{comment.owner}}:</b> {{comment.comment}}
+										</div>
+										<div class="bottom">
+											{{comment.time | date: 'HH:mm'}}h do dia {{comment.time | date: 'dd/MM/yyyy'}}.
+										</div>
+									</li>
+								</ul>
+							</card-collapse>
+							<div class="wrapper-comment-box">
+								<div class="comment-box">
+									<paper-input label="Escreva um comentário" ng-model="commentInput" ng-keyup="checkKey($event, item.id)"></paper-input>
+									<paper-icon-button icon="send" id="commentInput" ng-click="sendNewComment(commentInput, 'Alan', 'timestamp', item.id, $event)"></paper-icon-button>
+								</div>
+							</div>
+						</card>
+					</div>
+
+			  </section>
+			  <section id="page3">
+
+			  <div class="container" flex cross-fade>
+						<card flex ng-repeat="item in data | filter: {done: 1, deleted: 0}" ng-class="{fullscreen: fs, done: item.done == 1 }">
+							<card-header>
+									{{item.group}}
+									<div class="button-group">
+										<paper-icon-button icon="fullscreen" ng-click="fs = !fs"></paper-icon-button>
+										<paper-checkbox  ng-checked="{{transform(item.done)}}" ng-click="toggleDoneState(item.id)"></paper-checkbox>
+										<paper-menu-button>
+										  <paper-icon-button icon="more-vert" noink></paper-icon-button>
+										  <paper-dropdown halign="right" class="dropdown">
+										    <core-menu class="menu">
+										      <paper-item>Arquivar</paper-item>
+										      <paper-item ng-click="deleteCard(item.id, $index)">Deletar</paper-item>
+										      <paper-item>Editar</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 1">Marcar como lido</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 0">Marcar como não lido</paper-item>
+										    </core-menu>
+										  </paper-dropdown>
+										</paper-menu-button>
+									</div>
+							</card-header>
+							<card-body>
+								<p>Hi man.</p>
+								<p> {{item.note}} </p>
+							</card-body>
+							<card-footer>
+								<small>
+									<i class="text-muted" style="top: 8px;position: relative;">Enviado por <u>{{item.name}}</u> às {{item.date | date: 'HH:mm'}}h do dia {{item.date | date: 'dd/MM/yyyy'}}</i>
+								</small>
+							</card-footer>
+						</card>
+					</div>
+
+			  </section>
+			  <section id="page4">
+					
+					<div class="container" flex cross-fade>
+						<card flex ng-repeat="item in data | filter: {done: 0, deleted: 0}" ng-class="{fullscreen: fs, done: item.done == 1 }">
+							<card-header>
+									{{item.group}}
+									<div class="button-group">
+										<paper-icon-button icon="fullscreen" ng-click="fs = !fs"></paper-icon-button>
+										<paper-checkbox ng-checked="{{transform(item.done)}}" ng-click="toggleDoneState(item.id)"></paper-checkbox>
+										<paper-menu-button>
+										  <paper-icon-button icon="more-vert" noink></paper-icon-button>
+										  <paper-dropdown halign="right" class="dropdown">
+										    <core-menu class="menu">
+										      <paper-item>Arquivar</paper-item>
+										      <paper-item ng-click="deleteCard(item.id, $index)">Deletar</paper-item>
+										      <paper-item>Editar</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 1">Marcar como lido</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 0">Marcar como não lido</paper-item>
+										      <!-- <paper-item ng-click="status(item.id)">Status</paper-item> -->
+										    </core-menu>
+										  </paper-dropdown>
+										</paper-menu-button>
+									</div>
+							</card-header>
+							<card-body>
+								<p>Hi man.</p>
+								<p> {{item.note}} </p>
+							</card-body>
+							<card-footer>
+								<small>
+									<i class="text-muted" style="top: 8px;position: relative;">Enviado por <u>{{item.name}}</u> às {{item.date | date: 'HH:mm'}}h do dia {{item.date | date: 'dd/MM/yyyy'}}</i>
+								</small>
+							</card-footer>
+						</card>
+					</div>
+
+			  </section>
+
+			  <section id="page5">
+			  	<div class="container" flex cross-fade>
+						<card flex ng-repeat="item in data | filter: {unread: 0, deleted: 0} | orderBy: item.unread" ng-class="{fullscreen: fs, done: item.done == 1}">
+							<card-header>
+									{{item.group}}
+									<div class="button-group">
+										<paper-icon-button icon="fullscreen" ng-click="fs = !fs"></paper-icon-button>
+										<paper-checkbox  ng-checked="{{transform(item.done)}}" ng-click="toggleDoneState(item.id)"></paper-checkbox>
+										<paper-menu-button>
+										  <paper-icon-button icon="more-vert" noink></paper-icon-button>
+										  <paper-dropdown halign="right" class="dropdown">
+										    <core-menu class="menu">
+										      <paper-item>Arquivar</paper-item>
+										      <paper-item ng-click="deleteCard(item.id, $index)">Deletar</paper-item>
+										      <paper-item>Editar</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 1">Marcar como lido</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 0">Marcar como não lido</paper-item>
+										    </core-menu>
+										  </paper-dropdown>
+										</paper-menu-button>
+									</div>
+							</card-header>
+							<card-body>
+								<p>Hi man.</p>
+								<p> {{item.note}} </p>
+							</card-body>
+							<card-footer>
+								<small>
+									<i class="text-muted" style="top: 8px;position: relative;">Enviado por <u>{{item.name}}</u> às {{item.date | date: 'HH:mm'}}h do dia {{item.date | date: 'dd/MM/yyyy'}}</i>
+								</small>
+							</card-footer>
+						</card>
+					</div>
+
+			  </section>
+
+			  <section id='page6'>
+			  	
+			  	<div class="container" flex cross-fade>
+						<card flex ng-repeat="item in data | filter: {deleted: 1} | orderBy: item.unread" ng-class="{fullscreen: fs, done: item.done == 1}">
+							<card-header>
+									{{item.group}}
+									<div class="button-group">
+										<paper-icon-button icon="fullscreen" ng-click="fs = !fs"></paper-icon-button>
+										<paper-checkbox  ng-checked="{{transform(item.done)}}" ng-click="toggleDoneState(item.id)"></paper-checkbox>
+										<paper-menu-button>
+										  <paper-icon-button icon="more-vert" noink></paper-icon-button>
+										  <paper-dropdown halign="right" class="dropdown">
+										    <core-menu class="menu">
+										      <paper-item>Arquivar</paper-item>
+										      <paper-item ng-click="recoverCard(item.id, $index)">Restaurar</paper-item>
+										      <paper-item>Editar</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 1">Marcar como lido</paper-item>
+										      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 0">Marcar como não lido</paper-item>
+										    </core-menu>
+										  </paper-dropdown>
+										</paper-menu-button>
+									</div>
+							</card-header>
+							<card-body>
+								<p>Hi man.</p>
+								<p> {{item.note}} </p>
+							</card-body>
+							<card-footer>
+								<small>
+									<i class="text-muted" style="top: 8px;position: relative;">Enviado por <u>{{item.name}}</u> às {{item.date | date: 'HH:mm'}}h do dia {{item.date | date: 'dd/MM/yyyy'}}</i>
+								</small>
+							</card-footer>
+						</card>
+					</div>
+			  </section>
+			  <section id="page7">
+			  	<div class="container" cross-fade>
+				  	<card flex ng-repeat="notification in notifications | orderBy: '-time':false">
+								<card-body>
+									<p>{{notification.note}} por {{notification.owner}} - <span class="text-muted">{{notification.time | date: 'HH:mm' }} em {{notification.time | date: 'dd/MM/yyyy'}}</span></p>
+								</card-body>
+				  	</card>
+				  </div>
+			  </section>
+
+			</core-animated-pages>
+	  </div>
+	</core-scaffold>
+
+    <icon-transition id="icon1" on-mouseover="{{ pickShape }}" shape="plus" ></icon-transition>
+    <icon-transition id="icon2" on-mouseover="{{ pickShape }}" shape="check" ></icon-transition>
+
+    <script>
+      Polymer('transition-demo', {
+        pickShape: function(e, target, sender) {
+          this.shape = sender.shape;
+        }
+      });
+    </script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-animate.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular-aria.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angular_material/0.8.2/angular-material.min.js"></script>
+
+</body>
+</html>
