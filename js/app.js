@@ -1,10 +1,17 @@
-var app = angular.module('myApp', ['ng-polymer-elements','ngMaterial']);
+var app = angular.module('myApp', ['ng-polymer-elements','ngMaterial']), _scope;
 
-app.controller('mainController', function($scope, $filter){
+app.controller('mainController', function($scope, $timeout, $filter){
+
+	_scope = $scope;
+
+	function safeApply(scope, fn) {
+	    (scope.$$phase || scope.$root.$$phase) ? fn() : scope.$apply(fn);
+	}
 
 	$scope.comments = [];
 	$scope.notifications = [];
 	$scope.data = [];
+	var data = [];
 
 	document.addEventListener('polymer-ready', function (){
 
@@ -18,7 +25,7 @@ app.controller('mainController', function($scope, $filter){
 			socket.emit('comments');
 		});
 
-		socket.on('dataset', function (data){
+		/*socket.on('dataset', function (data){
 			if(!data) return console.error('no data to parse JSON - data');
 			$scope.$apply(function (){
 				if($scope.data !== JSON.parse(data)){
@@ -26,6 +33,16 @@ app.controller('mainController', function($scope, $filter){
 				}
 			});
 			setTimeout(function () {$('.load-overlay').fadeOut('slow');}, 1000);
+		});*/
+
+		socket.on('dataset', function (response){
+			if(!response) return console.error('no data to parse JSON - data');
+			data = JSON.parse(response);
+			_scope.data = data
+
+			$scope.changePage(null, 0, true);
+
+			setTimeout(function () {$('.load-overlay').fadeOut('slow');}, 1);
 		});
 
 		socket.on('notifications', function (data){
@@ -62,47 +79,53 @@ app.controller('mainController', function($scope, $filter){
 		});
 	});
 	
-	/* fix ng-polymer-elements */
-
-	function bootstrap() {
-		angular.bootstrap(wrap(document), ['ng-polymer-elements-example']);
-	}
-
-	if(angular.isDefined(document.body.attributes['unresolved'])) {
-		var readyListener = function() {
-			bootstrap();
-			window.removeEventListener('polymer-ready', readyListener);
-		}
-		window.addEventListener('polymer-ready', readyListener);
-	} else {
-		bootstrap();
-	}
-
-	/* /fix ng-polymer-elements */
-
 	var pages = document.querySelector('core-animated-pages');
 	var drawer = document.querySelector('core-scaffold');
 	var menu = document.querySelector('core-menu');
 
 	$scope.pages = [
-		{id: 0, title: "Caixa de entrada", icon: "markunread-mailbox"},
+		{id: 0, title: "Caixa de entrada", icon: "markunread-mailbox", test: {unread: 1}},
 		{id: 1, title: "Todos os Tickets", icon: "assignment"},
-		{id: 2, title: "Tickets concluidos", icon: "assignment-turned-in"},
-		{id: 3, title: "Tickets em aberto", icon: "assignment-late"},
-		{id: 4, title: "Tickets lidos", icon: "drafts"},
-		{id: 5, title: "Lixeira", icon: "delete"},
+		{id: 2, title: "Tickets concluidos", icon: "assignment-turned-in", test: {done: 1}},
+		{id: 3, title: "Tickets em aberto", icon: "assignment-late", test: {done: 0}},
+		{id: 4, title: "Tickets lidos", icon: "drafts", test: {unread: 0}},
+		{id: 5, title: "Lixeira", icon: "delete", test: {deleted: 1}},
 		{id: 6, title: "Notificações", icon: "social:notifications"}
 	];
 
-	$scope.activePage = $scope.pages[0];
-	pages.selected = $scope.activePage.id;
-	menu.selected = $scope.activePage.id;
+	$scope.changePage = function (e, index, render) {
+		var targetPage = (isset(index)) ? index : $(e.target).attr('page');
 
-	$scope.changePage = function (e) {
-		var targetPage = $(e.target).attr('page');
 		pages.selected = targetPage;
-		$scope.activePage = $scope.pages[targetPage];
+		menu.selected = targetPage;
+		var page = $scope.pages[targetPage];
+		$scope.activePage = page;
 		drawer.closeDrawer();
+
+		if(isset(render) && render) {
+
+			if(targetPage == 1){
+				List(data);
+				return;
+			} else if(targetPage == 6){
+				return;
+			}
+
+			var r = [];
+
+			data.filter(function (obj) {
+
+				for (var filter in page.test) {
+					if(parseInt(obj[filter], 10) === page.test[filter]) {
+						r.push(obj);
+					}
+				}
+
+				return r;
+			});
+
+			List(r);
+		}
 	}
 
 	$scope.deleteCard = function (id, index, e) {
@@ -113,55 +136,14 @@ app.controller('mainController', function($scope, $filter){
 	}
 
 	$scope.createTicket = function () {
-		$scope.data.push({id: $scope.data.length + 1, name: prompt('ticket name'), time: 'random', date: 'random', group: prompt('ticket group') , note: prompt('ticket description'), done: 0, unread: 1});
-	}
+		var name = prompt('ticket name');
+		var group = prompt('ticket group');
+		var note = prompt('ticket description');
 
-	$scope.markAsRead = function (id, index) {
-		if($scope.data[$scope.returnCard(id)].unread == 1){
-			socket.emit('update_ticket', {id: id, set: 'unread=0'});
-			socket.emit('new_notification', {note: 'O ticket N° '+id+' foi marcado como lido', time: new Date().getTime(), owner: "Alan"});
-		}else{
-			socket.emit('update_ticket', {id: id, set: 'unread=1'});
-			socket.emit('new_notification', {note: 'O ticket N° '+id+' foi marcado como não lido', time: new Date().getTime(), owner: "Alan"});
-		}
-	}
-
-	$scope.recoverCard = function (id){
-		socket.emit('update_ticket', {id: id, set: 'deleted=0'});
-		socket.emit('new_notification', {note: 'O ticket N° '+id+' foi restaurado', time: new Date().getTime(), owner: "Alan"});
-	}
-
-	$scope.status = function (id){
-		for (var i = 0; i < $scope.data.length; i++) {
-			if($scope.data[i].id == id){
-			}
-		};		
-	}
-
-	$scope.toggleDoneState = function (id){
-		if($scope.data[$scope.returnCard(id)].done == 0){
-			socket.emit('update_ticket', {id: id, set: 'done=1,unread=0'});
-			socket.emit('new_notification', {note: 'O ticket N° '+id+' foi fechado.', time: new Date().getTime(), owner: "Alan"});
-		}else{
-			socket.emit('update_ticket', {id: id, set: 'done=0'});
-			socket.emit('new_notification', {note: 'O ticket N° '+id+' foi reaberto', time: new Date().getTime(), owner: "Alan"});
-		}	
-	}
-
-	$scope.transform = function (done){
-		if(done == 1){
-			return true;
-		}else{
-			return false;
-		}
-	}
-
-	$scope.returnCard = function (id) {
-		for (var i = 0; i < $scope.data.length; i++) {
-			if($scope.data[i].id == id){
-				return i;
-			}
-		}
+		safeApply($scope, function () {
+			$scope.data.unshift({id: $scope.data.length + 1, name: name, time: 'random', date: 'random', group: group , note: note, done: 0, unread: 1});
+			console.log($scope.data);
+		})
 	}
 
 	$scope.discardDraft = function (event) {
@@ -172,20 +154,6 @@ app.controller('mainController', function($scope, $filter){
 		var toast = document.querySelector('paper-toast');
 		toast.text = text;
 		toast.show();
-	}
-
-	$scope.toggleCollapse = function (e, id) {
-
-		$(e.target).parents('card').find('card-collapse').slideToggle(null, function (){
-			if($(this).css('opacity') == 0){
-				$(this).css({opacity: 1});
-				$(this).animate({
-				    scrollTop: 0
-				}, 500)
-			}else{
-				$(this).css({opacity: 0});
-			}
-		});
 	}
 
 	$scope.checkKey = function (e, id) {
@@ -199,14 +167,22 @@ app.controller('mainController', function($scope, $filter){
 		}
 	}
 
-	$scope.sendNewComment = function (c, owner, time, id, e) {
-		if(time == 'timestamp'){ time = new Date().getTime(); };
-		socket.emit('new_comment', {comment: c, owner: owner, time: time , ticketReference: id});
-		$('[ng-model="commentInput"]').val('');
+	function List (array) {
+		$('section#page' + ($scope.activePage.id +1 )).find('.container').html('');
 
-		if($(e.target).parents('card').find('card-collapse').css('opacity') == 0){
-			$scope.toggleCollapse(e, id);
-		}
+		for (var i = 0; i < array.length; i++) {
+			var row = array[i];
+			new Ticket({
+				id: row.id,
+				group: row.group,
+				owner: row.name,
+				content: row.note,
+				timestamp: parseInt(row.date, 10),
+				comments: (row.comments) ? row.comments : [],
+				done: row.done,
+				socket: socket
+			});
+		};
 	}
 
 });

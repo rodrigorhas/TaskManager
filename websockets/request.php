@@ -8,12 +8,23 @@
 		switch ($action) {
 			case 'get_tickets':
 				
-				$query = 'SELECT * FROM tickets';
-				$result = $mysqli->query($query) or die($mysqli->error);
+				$ticketQuery = 'SELECT * FROM tickets ORDER BY `date` DESC';
+				$ticketResult = $mysqli->query($ticketQuery) or die($mysqli->error);
+
 
 				$arr = array();
 
-				while ($row = $result->fetch_assoc()) {
+				while ($row = $ticketResult->fetch_assoc()) {
+
+					$commentQuery = 'SELECT * FROM comments WHERE ticketReference = '. $row['id'] .' ORDER BY `time` DESC';
+					$commentResult = $mysqli->query($commentQuery) or die($mysqli->error);
+
+					$row['comments'] = array();
+
+					while( $comment = $commentResult->fetch_assoc() ) {
+						array_push($row['comments'], $comment); 
+					}
+
 					array_push($arr, $row);
 				}
 
@@ -29,6 +40,7 @@
 				$arr = array();
 
 				while ($row = $result->fetch_assoc()) {
+					$row['note'] = utf8_encode($row['note']);
 					array_push($arr, $row);
 				}
 
@@ -36,7 +48,7 @@
 
 				break;
 
-			case 'get_comments':
+			/*case 'get_comments':
 				
 				$query = 'SELECT * FROM comments';
 				$result = $mysqli->query($query) or die($mysqli->error);
@@ -49,7 +61,7 @@
 
 				echo $json = json_encode($arr);
 
-				break;
+				break;*/
 
 			case 'new_notification':
 

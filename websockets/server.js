@@ -15,7 +15,7 @@ function init(){
 	var socket = io.listen(server);
 	console.log('Waiting for connections...');
 
-	var requestUrl = 'http://192.168.0.56/NewProject/websockets/request.php';
+	var requestUrl = 'http://192.168.0.56/TaskManager/websockets/request.php';
 
 	function refreshDataset () {
 		najax(requestUrl + "?action=get_tickets", function(data){
@@ -82,14 +82,14 @@ function init(){
 			refreshNotification();
 		});
 
-		client.on('comments', function (ticket){
+		/*client.on('comments', function (ticket){
 			console.log('sending comments');
 			refreshComments();
-		});
+		});*/
 
 		client.on('update_ticket', function (ticket){
 			update_ticket(ticket.id, ticket.set, function (){
-				refreshDataset();
+				//refreshDataset();
 			});
 		});
 

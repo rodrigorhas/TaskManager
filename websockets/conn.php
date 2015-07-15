@@ -1,5 +1,5 @@
 <?php
 
-	$mysqli = new mysqli('mysql.cacpcontabilidade.com', 'cacpcontabilid01', 'admin923885', 'cacpcontabilid01');
+	$mysqli = new mysqli('192.168.0.58', 'root', 'admin923885', 'task_manager');
 
 ?>

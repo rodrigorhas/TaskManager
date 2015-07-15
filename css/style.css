@@ -400,7 +400,6 @@ core-menu core-item[icon="delete"]::shadow core-icon {
 .infinity-list {
 	list-style: none;
 	padding-left: 0;
-	margin-bottom: 0;
 }
 
 .infinity-list .list-item {
