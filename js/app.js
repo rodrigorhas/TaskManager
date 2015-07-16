@@ -2,6 +2,20 @@ var data = [];
 
 document.addEventListener('polymer-ready', function (){
 
+	function Toast () {
+		var _this = this;
+		document.addEventListener('polymer-ready', function (){		
+			_this.dom = document.querySelector('paper-toast');
+		});
+	}
+
+	Toast.prototype.show = function (text) {
+		this.dom.text = text;
+		this.dom.show();
+	}
+
+	window.Toast = new Toast();
+
 	function Menu () {
 		this.pages = [
 			{id: 0, title: "Caixa de entrada", icon: "markunread-mailbox", test: {unread: 1}},
@@ -125,25 +139,30 @@ document.addEventListener('polymer-ready', function (){
 		var notifications = JSON.parse(data);
 	});
 
-	socket.on('new_notification', function (data){
-		$scope.$apply(function () {
-			$scope.notifications.unshift(data);
-			$scope.showToast(data.note + ' por ' + data.owner + ' - ' + $filter('date')(data.time, 'HH:mm') + ' em ' + $filter('date')(data.time, 'dd/MM/yyyy'));
-		});
+	socket.on('new_notification', function (response){
+		var date = new Date(response.time);
+
+		var day = date.getDate(),
+	    	month = date.getMonth() + 1,
+	    	year = date.getFullYear(),
+			fullDate =  day + "/" + month + "/" + year;
+
+		window.Toast.show(response.note + ' por ' + response.owner + ' - ' + date.getHours() + ':' + date.getMinutes() + ' em ' + fullDate);
+
 	});
 
-	socket.on('comments', function (data){
-		if(!data) return console.error('no data to parse JSON - comments');
-		$scope.$apply(function () {
-			$scope.comments = JSON.parse(data);
-		});
-	});
+	socket.on('new_comment', function (response){
+		window.Toast.show(response.owner + ' comentou o ticket N° ' + response.ticketReference);
 
-	socket.on('new_comment', function (data){
-		$scope.$apply(function () {
-			$scope.comments.unshift(data);
-			$scope.showToast(data.owner + ' comentou o ticket N° ' + data.ticketReference);
-		});
+		data.filter(function (obj) {
+			if(obj.id == response.ticketReference) {
+				obj.comments.unshift(response);
+				obj.collapse = true;
+				if(window.Menu.activePage.id != (1 && 6) ) {
+					window.Menu.changePage(null, window.Menu.activePage.id ,true);
+				}
+			}
+		})
 	});
 
 	// Add a disconnect listener

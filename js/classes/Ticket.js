@@ -161,6 +161,9 @@ Ticket.prototype.render = function () {
 	var pages = document.querySelector('core-animated-pages');
 	this.target = $('section#page' + (parseInt(pages.selected, 10) + 1) + ' .container')
 	this.dom.prependTo('section#page' + (parseInt(pages.selected, 10) + 1) + ' .container');
+	if(this.collapse == true) {
+		this.toggleCardCollapse();
+	}
 }
 
 Ticket.prototype.genComments = function () {
