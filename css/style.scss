@@ -1,0 +1,385 @@
+body {
+	font-family: "RobotoDraft", sans-serif;
+	font-weight: 300;
+	-webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+	-moz-tap-highlight-color: rgba(0,0,0,0) !important;
+	-ms-tap-highlight-color: rgba(0,0,0,0) !important;
+	-o-tap-highlight-color: rgba(0,0,0,0) !important;
+	tap-highlight-color: rgba(0,0,0,0) !important;
+	color: #333;
+}
+
+/* main elements */
+.container {
+	background-color: rgb(229,229,229);
+	padding: 8px;
+
+	&[flex] {
+		justify-content: center;
+	}
+}
+
+.text-muted {
+	color: rgba(0, 0, 0, 0.27);
+}
+
+.pull-right {
+	float: right !important;
+}
+
+.pull-left {
+	float: left !important;
+}
+
+.show {
+	display: block;
+}
+
+.hide {
+	display: none;
+}
+
+.tool-icon {
+	position: absolute;
+	top: 10px;
+	right: 24px;
+	float: right;
+}
+
+:host(.core-selected) {
+	font-weight: 500 !important;
+}
+
+div[fit] {
+	background-color: rgb(229,229,229);
+}
+
+.well {
+	height: auto;
+	position: relative;
+	display: block;
+	margin: 15px;
+	padding: 16px;
+	word-wrap: break-word;
+	background-color: rgb(255, 255, 255);
+	border: 1px solid rgb(204, 204, 204);
+}
+
+.badge{
+	position: absolute;
+	right: 16px;
+	top: 10px;
+	background-color: rgba(229, 229, 229, 0.35);
+	border-radius: 50%;
+	width: 21px;
+	height: 21px;
+	padding: 1px 7px;
+}
+
+/* card */
+
+card {
+	position: relative;
+	background-color: white;
+	min-width: 256px;
+	width: 0%;
+	margin: 0 0 8px; 
+	display: flex;
+	box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+	border-radius: 2px; 
+	flex-wrap: wrap;
+	padding: 0;
+	border-top: 2px solid transparent;
+	transition: all 400ms;
+
+	&:hover {
+		box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.3), 0 2px 2px 0 rgba(0, 0, 0, 0.2);
+	}
+
+	&.fullscreen {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1;
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+
+	&[flex] {
+		width: auto;
+	}
+
+	&.done {
+		border-top: 2px solid rgb(0, 150, 136);
+	}
+
+	&.unread {
+		background-color: rgb(223, 237, 250);
+	}
+
+	.text {
+		padding: 16px;
+	}
+
+	card-header {
+		padding: 16px;
+		width: 100%;
+		position: relative;
+		display: inline;
+		background-color: inherit;
+		font-size: 18px;
+		font-weight: 500;
+
+		 small i{
+			position: relative;
+			top: 16px;
+		}
+
+		&[bordered] {
+			border-bottom: 1px solid rgb(227, 227, 227);
+		}
+
+		.button-group {
+			position: absolute;
+			right: 10px;
+			top: 10px;
+
+			&.left {
+				position: absolute;
+				right: auto !important;
+				left: -16px !important;
+			}
+
+			paper-icon-button {
+				position: relative;
+				top: 0px;
+
+				&[icon="favorite"].active {
+					color: rgb(244, 67, 54);
+				}
+
+				&[icon="favorite"] {
+					color: rgb(212, 212, 212);
+				}
+			}
+
+			paper-checkbox {
+				margin: 0 8px;
+				top: -11px;
+				position: relative;
+			}
+		}
+	}
+
+	card-body {
+		p {
+			padding: 4px 16px;
+		}
+	}
+
+	card-footer {
+		padding: 0 16px 16px 16px;
+		width: 100%;
+		position: relative;
+		display: inline;
+		background-color: inherit;
+		font-size: 18px;
+		left: 0;
+
+		.button-group {
+			&.right {
+				position: absolute;
+				right: 10px;
+				top: 10px;
+			}
+
+			paper-icon-button {
+				position: relative;
+				top: 0px;
+			}
+		}
+	}
+
+	card-collapse {
+		position: relative;
+		padding: 0px 16px 0 16px;
+		border-top: 1px solid rgb(220,220,220);
+		width: 100%;
+		max-height: 400px;
+		overflow-y: auto;
+		display: none;
+		opacity: 0;
+		transition: opacity .250s;
+		background-color: rgb(245,245,245);
+	}
+}
+
+/* drawer core-toolbar */
+.core-toolbar-style {
+	background-color: rgb(100, 129, 178);
+	color: rgb(255, 255, 255);
+	padding-left: 11px;
+}
+
+/* drawer core-menu */
+
+core-menu core-item {
+	&.core-selected {
+		font-weight: 500;
+	}
+	&[icon="assignment"]::shadow core-icon {
+		color: #555;
+	}
+	&[icon="assignment-turned-in"]::shadow core-icon {
+		color: rgb(168, 228, 103);
+	}
+	&[icon="assignment-late"]::shadow core-icon {
+		color: rgb(251, 121, 121);
+	}
+	&[icon="drafts"]::shadow core-icon {
+		color: rgb(255, 216, 115);
+	}
+	&[icon="markunread-mailbox"]::shadow core-icon {
+		color: rgb(145, 142, 255);
+	}
+	&[icon="history"]::shadow core-icon {
+		color: rgb(100, 100, 100);
+	}
+	&[icon="delete"]::shadow core-icon {
+		color: rgb(251, 121, 121);
+	}
+}
+
+.paper-icon-group {
+	&.right{
+		float: right;
+		position: absolute;
+		right: 16px;
+		top: 5px;
+		padding: 5px;
+	}
+}
+
+* /deep/ core-overlay#filterForm, * /deep/ core-overlay#newTicketForm {
+	background-color: white;
+	color: #333;
+	width: 300px;
+	height: auto;
+	padding: 32px;
+	overflow: auto;
+}
+
+* /deep/ core-overlay paper-button.pull-right {
+	float: right;
+}
+
+/* load-overlay */
+
+.load-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+	display: block;
+	background-color: rgb(229,229,229);
+}
+
+.loader {
+	position: relative;
+	top: 50%;
+	margin: -100px auto;
+	width: 100px;
+	height: 100px;
+	zoom: 1.7;
+	z-index: 2;
+
+	span {
+		padding-left: 10px;
+	}
+}
+
+.fix {
+	margin-left: 25px;
+	margin-bottom: 25px !important;
+}
+
+/* infinity-list */
+
+.infinity-list {
+	list-style: none;
+	padding-left: 0;
+
+	.list-item {
+		display: block;
+		margin: 0;
+		padding: 8px 16px;
+		font-size: 15px;
+
+		.top, .bottom {
+			display: block;
+			width: 100%;
+		}
+
+		.top b {
+			color: rgb(64, 64, 64);
+		}
+
+		.bottom {
+			color: rgba(0, 0, 0, 0.35);
+			padding-top: 4px;
+		}
+	}
+}
+
+/* comment-box */
+
+.comment-box {
+	padding: 0 16px 16px 16px;
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;  
+	-webkit-flex-direction: row;
+	-moz-flex-direction: row;
+	-ms-flex-direction: row;
+	-o-flex-direction: row;
+	flex-direction: row;
+	align-items: center;
+	background-color: rgb(250,250,250);
+	border-top: 1px solid rgb(220,220,220);
+
+	paper-input {
+		width: 100%;
+		margin-right: 21px;
+	}
+
+	paper-icon-button {
+		color: rgb(114, 164, 242);
+	}
+}
+
+.wrapper-comment-box {
+	display: block;
+	width: 100%;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background-color: rgba(0, 0, 0, 0.14);
+}

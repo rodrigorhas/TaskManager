@@ -82,15 +82,8 @@ function init(){
 			refreshNotification();
 		});
 
-		/*client.on('comments', function (ticket){
-			console.log('sending comments');
-			refreshComments();
-		});*/
-
 		client.on('update_ticket', function (ticket){
-			update_ticket(ticket.id, ticket.set, function (){
-				//refreshDataset();
-			});
+			update_ticket(ticket.id, ticket.set);
 		});
 
 		client.on('new_notification', function (notify){

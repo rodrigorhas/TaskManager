@@ -119,11 +119,15 @@ Ticket.prototype.attachListeners = function () {
 		var isChecked = (c.attr('checked') != undefined) ? true : false;
 
 		_this.done = (!isChecked) ? 1 : 0;
-		_scope.data[_this.id].done = _this.done;
+		data[_this.id].done = _this.done;
+
+		_this.turnOnTheLights();
+
+		window.Menu.changePage(null, window.Menu.activePage.id, true);
 
 		if(!isChecked) {
 
-			_scope.data[_this.id].unread = 0;
+			data[_this.id].unread = 0;
 			_this.socket.emit('update_ticket', {id: _this.id, set: 'done=1,unread=0'});
 			_this.socket.emit('new_notification', {note: 'O ticket N° '+ _this.id +' foi fechado.', time: Date.now(), owner: 'Alan'});
 
@@ -134,7 +138,7 @@ Ticket.prototype.attachListeners = function () {
 
 		}
 
-		_scope.changePage(null, _scope.activePage.id, true);
+		window.Menu.changePage(null, window.Menu.activePage.id, true);
 
 	})
 
@@ -179,4 +183,12 @@ Ticket.prototype.genComments = function () {
 	};
 
 	return all.join('');
+}
+
+Ticket.prototype.turnOnTheLights = function () {
+	if(this.dom.hasClass('done')) {
+		this.dom.removeClass();
+	} else {
+		this.dom.addClass('done');
+	}
 }
