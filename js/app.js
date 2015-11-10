@@ -155,19 +155,19 @@ document.addEventListener('polymer-ready', function (){
 			fullDate =  day + "/" + month + "/" + year;
 
 		window.Toast.show(response.note + ' por ' + response.owner + ' - ' + date.getHours() + ':' + date.getMinutes() + ' em ' + fullDate);
-
 	});
 
-	socket.on('new_comment', function (response){
+	socket.on('new_comment', function (response) {
+		console.log(response);
 		window.Toast.show(response.owner + ' comentou o ticket N° ' + response.ticketReference);
 
-		data.filter(function (obj) {
-			if(obj.id == response.ticketReference) {
-				obj.comments.unshift(response);
-				obj.collapse = true;
-				if(window.Menu.activePage.id != (1 && 6) ) {
+		data.filter(function (ticket) {
+			if(ticket.id == response.ticketReference) {
+				//ticket.addComment(response)
+
+				/*if(window.Menu.activePage.id != (1 && 6) ) {
 					window.Menu.changePage(null, window.Menu.activePage.id ,true);
-				}
+				}*/
 			}
 		})
 	});
