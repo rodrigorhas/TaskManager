@@ -1,6 +1,6 @@
 <?php
 
-	include_once('conn.php');
+	require 'conn.php';
 
 	if(isset($_GET['action'])) {
 		$action = $_GET['action'];
@@ -48,7 +48,7 @@
 
 				break;
 
-			/*case 'get_comments':
+			case 'get_comments':
 				
 				$query = 'SELECT * FROM comments';
 				$result = $mysqli->query($query) or die($mysqli->error);
@@ -61,7 +61,7 @@
 
 				echo $json = json_encode($arr);
 
-				break;*/
+				break;
 
 			case 'new_notification':
 
