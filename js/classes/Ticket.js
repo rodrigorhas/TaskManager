@@ -86,7 +86,10 @@ Ticket.prototype.read = function () {}
 
 Ticket.prototype.unread = function () {}
 
-Ticket.prototype.comment = function () {}
+Ticket.prototype.addComment = function (comment) {
+	this.comments.unshift(comment);
+	this.dom.find('.infinity-list').html(this.genComments());
+}
 
 Ticket.prototype.follow = function () {}
 
@@ -100,48 +103,59 @@ Ticket.prototype.transform = function (done){
 }
 
 Ticket.prototype.attachListeners = function () {
-	var _this = this;
+	var self = this;
+	var commentBox = this.dom.find('#commentInput');
+
+	function sendComment () {
+		self.socket.emit('new_comment', {comment: commentBox.val(), owner: prompt('qual o seu nome ?'), time: Date.now() , ticketReference: self.id});
+		commentBox.val('');
+	}
 
 	this.dom.find('core-icon-button[icon="communication:comment"]').on('click', function () {
-		if(_this.comments.length > 0)
-			_this.toggleCardCollapse();
+		if(self.comments.length > 0)
+			self.toggleCardCollapse();
 	});
 
 	this.dom.find('#sendCommentButton').on('click', function () {
-		var input = _this.dom.find('#commentInput');
-		_this.socket.emit('new_comment', {comment: input.val(), owner: prompt('qual o seu nome ?'), time: Date.now() , ticketReference: _this.id});
-		input.val('');
+		sendComment();
 	});
 
 	this.dom.find('paper-checkbox').on('click', function () {
+
 		var c = $(this);
 
 		var isChecked = (c.attr('checked') != undefined) ? true : false;
 
-		_this.done = (!isChecked) ? 1 : 0;
-		data[_this.id].done = _this.done;
+		self.done = (!isChecked) ? 1 : 0;
+		data[self.id].done = self.done;
 
-		_this.turnOnTheLights();
+		self.turnOnTheLights();
 
 		window.Menu.changePage(null, window.Menu.activePage.id, true);
 
 		if(!isChecked) {
 
-			data[_this.id].unread = 0;
-			_this.socket.emit('update_ticket', {id: _this.id, set: 'done=1,unread=0'});
-			_this.socket.emit('new_notification', {note: 'O ticket N° '+ _this.id +' foi fechado.', time: Date.now(), owner: 'Alan'});
+			data[self.id].unread = 0;
+			self.socket.emit('update_ticket', {id: self.id, set: 'done=1,unread=0'});
+			self.socket.emit('new_notification', {note: 'O ticket N° '+ self.id +' foi fechado.', time: Date.now(), owner: 'Alan'});
 
 		}else{
 
-			_this.socket.emit('update_ticket', {id: _this.id, set: 'done=0'});
-			_this.socket.emit('new_notification', {note: 'O ticket N° '+ _this.id +' foi reaberto', time: Date.now(), owner: 'Alan'});
+			self.socket.emit('update_ticket', {id: self.id, set: 'done=0'});
+			self.socket.emit('new_notification', {note: 'O ticket N° '+ self.id +' foi reaberto', time: Date.now(), owner: 'Alan'});
 
 		}
 
 		window.Menu.changePage(null, window.Menu.activePage.id, true);
+	});
 
+	commentBox.on('keydown', function (e) {
+		var key = e.keyCode || e.which;
+
+		if(key == 13) {
+			sendComment();
+		}
 	})
-
 }
 
 Ticket.prototype.toggleCardCollapse = function () {
@@ -171,18 +185,18 @@ Ticket.prototype.genComments = function () {
 	var all = [];
 
 	for (var i = 0; i < this.comments.length; i++) {
-		var c = this.comments[i];
-		var tpl = 
+		var item = this.comments[i];
+		var template = 
 		'<li class="list-item">\
 			<div class="top">\
-				<b>'+ c.owner +':</b> '+ c.comment +
+				<b>'+ item.owner +':</b> '+ item.comment +
 			'</div>\
 			<div class="bottom">' +
-				$.timeago(parseInt(c.time, 10)) + '.' +
+				$.timeago(parseInt(item.time, 10)) + '.' +
 			'</div>\
 		</li>';
 
-		all.push(tpl);
+		all.push(template);
 	};
 
 	return all.join('');
