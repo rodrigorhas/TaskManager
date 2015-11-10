@@ -52,46 +52,51 @@ document.addEventListener('polymer-ready', function (){
 	}
 
 	Menu.prototype.changePage = function (e, index, render) {
-		var targetPage = (isset(index)) ? index : $(e.target).attr('page'),
+
+		return new Promise(function (resolve, reject) {
+			var targetPage = (isset(index)) ? index : $(e.target).attr('page'),
 			page = this.pages[targetPage];
 
-		this._Drawer = document.querySelector('core-scaffold');
-		this._Page = document.querySelector('core-animated-pages');
-		this._Menu = document.querySelector('core-menu');
-		
-		this.activePage = page;
+			this._Drawer = document.querySelector('core-scaffold');
+			this._Page = document.querySelector('core-animated-pages');
+			this._Menu = document.querySelector('core-menu');
+			
+			this.activePage = page;
 
-		this._Page.selected = targetPage;
-		this._Menu.selected = targetPage;
-		
-		this._Drawer.closeDrawer();
+			this._Page.selected = targetPage;
+			this._Menu.selected = targetPage;
+			
+			this._Drawer.closeDrawer();
 
-		$('#activePageTitle').html(page.title);
+			$('#activePageTitle').html(page.title);
 
-		if(isset(render) && render) {
+			resolve();
 
-			if(targetPage == 1){
-				List(data);
-				return;
-			} else if(targetPage == 6){
-				return;
-			}
+			if(isset(render) && render) {
 
-			var r = [];
-
-			data.filter(function (obj) {
-
-				for (var filter in page.test) {
-					if(obj[filter] == page.test[filter]) {
-						r.push(obj);
-					}
+				if(targetPage == 1){
+					List(data);
+					return;
+				} else if(targetPage == 6){
+					return;
 				}
 
-				return r;
-			});
+				var r = [];
 
-			List(r);
-		}
+				data.filter(function (obj) {
+
+					for (var filter in page.test) {
+						if(obj[filter] == page.test[filter]) {
+							r.push(obj);
+						}
+					}
+
+					return r;
+				});
+
+				List(r);
+			}
+		}.bind(this));
 	}
 
 	function List (array) {
