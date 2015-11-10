@@ -133,9 +133,11 @@ document.addEventListener('polymer-ready', function (){
 		if(!response) return console.error('no data to parse JSON - data');
 		data = JSON.parse(response);
 
-		window.Menu.changePage(null, 0, true);
+		console.log(data);
 
-		setTimeout(function () {$('.load-overlay').fadeOut('slow');}, 1);
+		window.Menu.changePage(null, 0, true).then(function () {
+			$('.load-overlay').fadeOut('slow');
+		});
 	});
 
 	socket.on('notifications', function (data){
