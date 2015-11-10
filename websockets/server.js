@@ -15,11 +15,10 @@ function init(){
 	var socket = io.listen(server);
 	console.log('Waiting for connections...');
 
-	var requestUrl = 'http://192.168.0.56/TaskManager/websockets/request.php';
+	var requestUrl = 'http://localhost/TaskManagerJs/websockets/request.php';
 
 	function refreshDataset () {
 		najax(requestUrl + "?action=get_tickets", function(data){
-			dataset = data;
 			socket.emit('dataset', data);
 		});
 	}

@@ -114,7 +114,7 @@ document.addEventListener('polymer-ready', function (){
 
 	window.Menu = new Menu();
 	
-	socket = io("http://192.168.0.56:8081");
+	socket = io("http://localhost:8081");
 
 	// Add a connect listener
 	socket.on('connect',function() {
