@@ -1,6 +1,6 @@
 var data = [];
 
-document.addEventListener('polymer-ready', function (){
+document.addEventListener('polymer-ready', function () {
 
 	function Toast () {
 		var _this = this;
@@ -13,8 +13,6 @@ document.addEventListener('polymer-ready', function (){
 		this.dom.text = text;
 		this.dom.show();
 	}
-
-	window.Toast = new Toast();
 
 	function Menu () {
 		this.pages = [
@@ -75,51 +73,51 @@ document.addEventListener('polymer-ready', function (){
 			if(isset(render) && render) {
 
 				if(targetPage == 1){
-					List(data);
+					RenderTickets(data);
 					return;
 				} else if(targetPage == 6){
 					return;
 				}
 
-				var r = [];
+				var tickets = [];
 
 				data.filter(function (obj) {
 
 					for (var filter in page.test) {
 						if(obj[filter] == page.test[filter]) {
-							r.push(obj);
+							tickets.push(obj);
 						}
 					}
 
-					return r;
+					return tickets;
 				});
 
-				List(r);
+				RenderTickets(tickets);
 			}
 		}.bind(this));
 	}
 
-	function List (array) {
-		$('section#page' + (window.Menu.activePage.id +1 )).find('.container').html('');
+	var Menu = new Menu();
+	var Toast = new Toast();
+	var socket = io("http://localhost:8081");
 
-		for (var i = 0; i < array.length; i++) {
-			var row = array[i];
-			new Ticket({
-				id: row.id,
-				group: row.group,
-				owner: row.name,
-				content: row.note,
-				timestamp: parseInt(row.date, 10),
-				comments: (row.comments) ? row.comments : [],
-				done: row.done,
-				socket: socket
-			});
-		};
+	function clearCurrentPage () {
+		return new Promise(function (resolve, reject) {
+			$('section#page' + (Menu.activePage.id +1 )).find('.container').html('');
+			resolve();
+		})
 	}
 
-	window.Menu = new Menu();
-	
-	socket = io("http://localhost:8081");
+	function RenderTickets (array) {
+		clearCurrentPage().then(function () {
+			for (var i = 0; i < array.length; i++) {
+				var row = array[i];
+
+				var pages = Menu._Page;
+				row.prependTo('section#page' + (parseInt(pages.selected, 10) + 1) + ' .container');
+			};
+		});
+	}
 
 	// Add a connect listener
 	socket.on('connect',function() {
@@ -129,13 +127,24 @@ document.addEventListener('polymer-ready', function (){
 		socket.emit('comments');
 	});
 
-	socket.on('dataset', function (response){
-		if(!response) return console.error('no data to parse JSON - data');
+	socket.on('dataset', function ( response ) {
+		if(!response) return console.error('No data to parse JSON - data');
 		data = JSON.parse(response);
 
-		console.log(data);
+		data = data.map(function ( item, index ) {
+			return new Ticket({
+				id: item.id,
+				group: item.group,
+				owner: item.name,
+				content: item.note,
+				timestamp: parseInt(item.date, 10),
+				comments: item.comments,
+				done: item.done,
+				socket: socket
+			});
+		});
 
-		window.Menu.changePage(null, 0, true).then(function () {
+		Menu.changePage(null, 0, true).then(function () {
 			$('.load-overlay').fadeOut('slow');
 		});
 	});
@@ -154,19 +163,19 @@ document.addEventListener('polymer-ready', function (){
 	    	year = date.getFullYear(),
 			fullDate =  day + "/" + month + "/" + year;
 
-		window.Toast.show(response.note + ' por ' + response.owner + ' - ' + date.getHours() + ':' + date.getMinutes() + ' em ' + fullDate);
+		Toast.show(response.note + ' por ' + response.owner + ' - ' + date.getHours() + ':' + date.getMinutes() + ' em ' + fullDate);
 	});
 
 	socket.on('new_comment', function (response) {
 		console.log(response);
-		window.Toast.show(response.owner + ' comentou o ticket N° ' + response.ticketReference);
+		Toast.show(response.owner + ' comentou o ticket N° ' + response.ticketReference);
 
 		data.filter(function (ticket) {
 			if(ticket.id == response.ticketReference) {
 				//ticket.addComment(response)
 
-				/*if(window.Menu.activePage.id != (1 && 6) ) {
-					window.Menu.changePage(null, window.Menu.activePage.id ,true);
+				/*if(Menu.activePage.id != (1 && 6) ) {
+					Menu.changePage(null, Menu.activePage.id ,true);
 				}*/
 			}
 		})

@@ -1,17 +1,15 @@
 function Ticket (config) {
 	this.id = config.id;
-	this.name = config.name;
 	this.group = config.group;
 	this.owner = config.owner;
-	this.filed = config.filed;
 	this.content = config.content;
 
 	this.socket = config.socket;
 
 	this.done = config.done;
-	this.unread = config.unread;
+	this.unread = config.unread || false;
 
-	this.comments = config.comments;
+	this.comments = config.comments || [];
 	this.followers = [];
 
 	this.creation_time = {
@@ -29,7 +27,7 @@ function Ticket (config) {
 	this.toggleCommentButton = new Event();
 	this.toggleDoneButton = new Event();
 
-	this.dom = $('<card flex '+ ((this.transform(this.done)) ? 'class="done"' : '') +' >\
+	this.dom = $('<card flex '+ ((this.boolGate(this.done)) ? 'class="done"' : '') +' >\
 					<card-header>\
 						<div class="title">'+ this.group +'</div>\
 						<small>\
@@ -75,27 +73,23 @@ function Ticket (config) {
 	
 	this.attachListeners();
 
-	this.render();
+	//this.render();
 }
 
-Ticket.prototype.done = function () {}
+/*Ticket.prototype.done = function () {}
 
 Ticket.prototype.undone = function () {}
 
 Ticket.prototype.read = function () {}
 
-Ticket.prototype.unread = function () {}
+Ticket.prototype.unread = function () {}*/
 
 Ticket.prototype.addComment = function (comment) {
 	this.comments.unshift(comment);
 	this.dom.find('.infinity-list').html(this.genComments());
 }
 
-Ticket.prototype.follow = function () {}
-
-Ticket.prototype.filed = function () {}
-
-Ticket.prototype.transform = function (done){
+Ticket.prototype.boolGate = function (done){
 	if(done == 1)
 		return true;
 
@@ -173,8 +167,10 @@ Ticket.prototype.toggleCardCollapse = function () {
 
 Ticket.prototype.render = function () {
 	var pages = document.querySelector('core-animated-pages');
+
 	this.target = $('section#page' + (parseInt(pages.selected, 10) + 1) + ' .container')
 	this.dom.prependTo('section#page' + (parseInt(pages.selected, 10) + 1) + ' .container');
+
 	if(this.collapse == true) {
 		this.toggleCardCollapse();
 	}
@@ -208,4 +204,9 @@ Ticket.prototype.turnOnTheLights = function () {
 	} else {
 		this.dom.addClass('done');
 	}
+}
+
+Ticket.prototype.prependTo = function ( element ) {
+
+	this.dom.prependTo(element);
 }
