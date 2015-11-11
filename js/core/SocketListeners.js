@@ -2,9 +2,10 @@ document.addEventListener('polymer-ready', function () {
 
 	var socket = io("http://localhost:8081");
 
-	// Add a connect listener
 	socket.on('connect',function() {
-		console.log('Client has connected to the server!');
+
+		App.Debug.info('Client has connected to the server!');
+
 		socket.emit('dataset');
 		socket.emit('notifications');
 		socket.emit('comments');
@@ -12,7 +13,8 @@ document.addEventListener('polymer-ready', function () {
 
 	socket.on('dataset', function ( response ) {
 
-		if(!response) return console.error('No data to parse JSON - data');
+		if(!response) return App.Debug.Exception('No data received - Stoping application');
+
 		App.receivedData = JSON.parse(response);
 
 		App.receivedData = App.receivedData.map(function ( item, index ) {
@@ -29,12 +31,12 @@ document.addEventListener('polymer-ready', function () {
 		});
 
 		App.Menu.changePage(null, 0, true).then(function () {
-			$('.load-overlay').fadeOut('slow');
+			App.LoadOverlay.hide();
 		});
 	});
 
-	socket.on('notifications', function (data){
-		if(!data) return console.error('no data to parse JSON - notifications');
+	socket.on('notifications', function (data) {
+		if(!data) return App.Debug.error('Something wrong with notifications');
 
 		var notifications = JSON.parse(data);
 	});
@@ -47,25 +49,38 @@ document.addEventListener('polymer-ready', function () {
 	    	year = date.getFullYear(),
 			fullDate =  day + "/" + month + "/" + year;
 
-		App.Toast.show(response.note + ' por ' + response.owner + ' - ' + date.getHours() + ':' + date.getMinutes() + ' em ' + fullDate);
+		App.Toast
+			.setText(
+				response.note +
+				' por ' +
+				response.owner +
+				' - ' +
+				date.getHours() +
+				':' +
+				date.getMinutes() +
+				' em ' +
+				fullDate
+			)
+			.show();
 	});
 
 	socket.on('new_comment', function (response) {
-		App.Toast.show(response.owner + ' comentou o ticket N° ' + response.ticketReference);
+		App.Toast
+			.setText(
+				response.owner +
+				' comentou o ticket N° '
+				+ response.ticketReference
+			)
+			.show();
 
-		App.receivedData.filter(function (ticket) {
-			if(ticket.id == response.ticketReference) {
-				ticket.addComment(response);
+		var ticket = App.Utils.findOne(response.ticketReference);
 
-				/*if(Menu.activePage.id != (1 && 6) ) {
-					Menu.changePage(null, Menu.activePage.id ,true);
-				}*/
-			}
-		})
+		if(ticket) ticket.addComment(response);
 	});
 
-	// Add a disconnect listener
 	socket.on('disconnect',function() {
-		console.log('The client has disconnected!');
+
+		App.Debug.warn('The client has disconnected!');
 	});
+
 }());

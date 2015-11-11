@@ -2,18 +2,34 @@
 
 	goog.provide('App.Toast');
 
-	function Toast () {
-		var _this = this;
-		document.addEventListener('polymer-ready', function (){		
-			_this.dom = document.querySelector('paper-toast');
-		});
+	App.Toast = {
+		_dom: null,
+
+		visible: false,
+
+		hide: function () {
+			if(!this.visible) return;
+
+			this._dom.hide();
+			this.visible = false;
+		},
+
+		setText: function ( text ) {
+			this._dom.text = text;
+		},
+
+		show: function () {
+			if(this.visible) {
+				this.hide();
+			}
+
+			this._dom.show();
+			this.visible = true;
+		}
 	}
 
-	Toast.prototype.show = function (text) {
-		this.dom.text = text;
-		this.dom.show();
-	}
-
-	App.Toast = new Toast();
+	document.addEventListener('polymer-ready', function (){		
+		App.Toast._dom = document.querySelector('paper-toast');
+	});
 
 })(goog, App);

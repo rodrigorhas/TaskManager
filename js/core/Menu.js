@@ -4,7 +4,7 @@
 
 	function clearCurrentPage () {
 		return new Promise(function (resolve, reject) {
-			$('section#page' + (App.Menu.activePage.id +1 )).find('.container').html('');
+			$('section#page' + (App.Menu.activePage.id++)).find('.container').html('');
 			resolve();
 		})
 	}
@@ -22,11 +22,11 @@
 
 	function Menu () {
 		this.pages = [
-			{id: 0, title: "Caixa de entrada", icon: "markunread-mailbox", test: {unread: 1}},
+			{id: 0, title: "Caixa de entrada", icon: "markunread-mailbox", test: {_unread: 1}},
 			{id: 1, title: "Todos os Tickets", icon: "assignment"},
-			{id: 2, title: "Tickets concluidos", icon: "assignment-turned-in", test: {done: 1}},
-			{id: 3, title: "Tickets em aberto", icon: "assignment-late", test: {done: 0}},
-			{id: 4, title: "Tickets lidos", icon: "drafts", test: {unread: 0}},
+			{id: 2, title: "Tickets concluidos", icon: "assignment-turned-in", test: {_done: 1}},
+			{id: 3, title: "Tickets em aberto", icon: "assignment-late", test: {_done: 0}},
+			{id: 4, title: "Tickets lidos", icon: "drafts", test: {_unread: 0}},
 			{id: 5, title: "Lixeira", icon: "delete", test: {deleted: 1}},
 			{id: 6, title: "Notificações", icon: "social:notifications"}
 		];
@@ -39,17 +39,16 @@
 		var self = this;
 
 		document.addEventListener('polymer-ready', function (){
-			var a = [];
+			var items = [],
+				menu = $('core-menu');
 
-			for (var i = 0; i < self.pages.length; i++) {
-				var p = self.pages[i];
-				var tpl = '<core-item page="' + p.id + '" icon="'+ p.icon +'" label="' + p.title + '"></core-item>';
-				a.push(tpl);
-			};
+			self.pages.forEach(function (page) {
+				items.push('<core-item page="' + page.id + '" icon="'+ page.icon +'" label="' + page.title + '"></core-item>');
+			});
 
-			$('core-menu').append(a.join(''));
+			menu.append(items.join(''));
 			
-			$('core-menu > core-item').on('click', function (e) {
+			menu.children('core-item').on('click', function (e) {
 				self.changePage(null, $(this).attr('page'), true);
 			});
 		});
@@ -58,7 +57,8 @@
 	Menu.prototype.changePage = function (e, index, render) {
 
 		return new Promise(function (resolve, reject) {
-			var targetPage = (isset(index)) ? index : $(e.target).attr('page'),
+
+			var targetPage = (goog.isDefAndNotNull(index)) ? index : $(e.target).attr('page'),
 			page = this.pages[targetPage];
 
 			this._Drawer = document.querySelector('core-scaffold');
@@ -72,11 +72,11 @@
 			
 			this._Drawer.closeDrawer();
 
-			$('#activePageTitle').html(page.title);
+			App.Toolbar.setTitle(page.title);
 
 			resolve();
 
-			if(isset(render) && render) {
+			if(goog.isDefAndNotNull(render) && render) {
 
 				if(targetPage == 1){
 					RenderTickets(App.receivedData);

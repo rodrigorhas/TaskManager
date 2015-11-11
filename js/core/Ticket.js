@@ -10,8 +10,8 @@
 
 		this.socket = config.socket;
 
-		this.done = config.done;
-		this.unread = config.unread || false;
+		this._done = config.done;
+		this._unread = config.unread || false;
 
 		this.comments = config.comments || [];
 		this.followers = [];
@@ -28,15 +28,15 @@
 		this.elapsed_time = 0;
 
 		this.dom = $(
-			'<card flex '+ ((this.boolGate(this.done)) ? 'class="done"' : '') +' >\
+			'<card flex '+ ((this.boolGate(this._done)) ? 'class="done"' : '') +' >\
 				<card-header>\
 					<div class="title">'+ this.group +'</div>\
 					<small>\
-					<i class="text-muted">Created by ' + this.owner +', '+ timeSince(this.creation_time.timestamp) +'</i>\
+					<i class="text-muted">Created by ' + this.owner +', '+ $.timeago(this.creation_time.timestamp) +'</i>\
 					</small>\
 					<div class="button-group right">\
 						<paper-icon-button icon="fullscreen" ng-click="fs = !fs"></paper-icon-button>\
-						<paper-checkbox '+ ((this.done == 1) ? 'checked' : '') +'></paper-checkbox>\
+						<paper-checkbox '+ ((this._done == 1) ? 'checked' : '') +'></paper-checkbox>\
 						<paper-menu-button>\
 						  <paper-icon-button icon="more-vert" noink></paper-icon-button>\
 						  <paper-dropdown halign="right" class="dropdown">\
@@ -44,8 +44,8 @@
 						      <paper-item>Arquivar</paper-item>\
 						      <paper-item ng-click="deleteCard(item.id, $index, $event)">Deletar</paper-item>\
 						      <paper-item>Editar</paper-item>\
-						      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 1">Marcar como lido</paper-item>\
-						      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 0">Marcar como não lido</paper-item>\
+						      <!--<paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 1">Marcar como lido</paper-item>\
+						      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 0">Marcar como não lido</paper-item>-->\
 						    </core-menu>\
 						  </paper-dropdown>\
 						</paper-menu-button>\
@@ -75,27 +75,41 @@
 		this.attachListeners();
 	}
 
-	/*Ticket.prototype.done = function () {}
+	Ticket.prototype.done = function () {
 
-	Ticket.prototype.undone = function () {}
+		this._done = true;
+	}
 
-	Ticket.prototype.read = function () {}
+	Ticket.prototype.undone = function () {
 
-	Ticket.prototype.unread = function () {}*/
+		this._done = false;
+	}
 
-	Ticket.prototype.addComment = function (comment) {
+	Ticket.prototype.read = function () {
+
+		this._unread = false;
+	}
+
+	Ticket.prototype.unread = function () {
+
+		this._unread = true;
+	}
+
+	Ticket.prototype.addComment = function ( comment ) {
 		this.comments.unshift(comment);
 		this.dom.find('.infinity-list').html(this.genComments());
 	}
 
-	Ticket.prototype.boolGate = function (done){
-		if(done == 1)
+	Ticket.prototype.boolGate = function ( input ) {
+
+		if(input == 1)
 			return true;
 
 		return false;
 	}
 
 	Ticket.prototype.attachListeners = function () {
+
 		var self = this;
 		var commentBox = this.dom.find('#commentInput');
 
@@ -120,14 +134,14 @@
 
 			var isChecked = (c.attr('checked') != undefined) ? true : false;
 
-			self.done = (!isChecked) ? 1 : 0;
-			App.receivedData[self.id].done = self.done;
+			self._done = (!isChecked) ? 1 : 0;
+			App.receivedData[self.id]._done = self._done;
 
 			self.toggleDoneStrip();
 
 			if( !isChecked ) {
 
-				App.receivedData[self.id].unread = 0;
+				App.receivedData[self.id]._unread = 0;
 				self.socket.emit('update_ticket', {id: self.id, set: 'done=1,unread=0'});
 				self.socket.emit('new_notification', {note: 'O ticket N° '+ self.id +' foi fechado.', time: Date.now(), owner: 'Alan'});
 			}
