@@ -10,7 +10,8 @@
 		hide: function () {
 			if(!this.visible) return;
 
-			this._dom.hide();
+			// Toast doesn't have hide method
+			this._dom.dismiss();
 			this.visible = false;
 		},
 
