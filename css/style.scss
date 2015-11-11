@@ -340,7 +340,7 @@ core-menu core-item {
 /* comment-box */
 
 .comment-box {
-	padding: 0 16px 16px 16px;
+	padding: 0 16px 8px 16px;
 	display: -webkit-box;
 	display: -moz-box;
 	display: -ms-flexbox;
@@ -361,7 +361,12 @@ core-menu core-item {
 	}
 
 	paper-icon-button {
-		color: rgb(114, 164, 242);
+		color: #8F98A5;
+		transition: .3s color cubic-bezier(0.19, 1, 0.22, 1);
+
+		&:hover {
+			color: rgb(114, 164, 242);
+		}
 	}
 }
 
