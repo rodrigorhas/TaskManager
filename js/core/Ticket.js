@@ -121,26 +121,25 @@
 			var isChecked = (c.attr('checked') != undefined) ? true : false;
 
 			self.done = (!isChecked) ? 1 : 0;
-			data[self.id].done = self.done;
+			App.receivedData[self.id].done = self.done;
 
-			self.turnOnTheLights();
+			self.toggleDoneStrip();
 
-			window.Menu.changePage(null, window.Menu.activePage.id, true);
+			if( !isChecked ) {
 
-			if(!isChecked) {
-
-				data[self.id].unread = 0;
+				App.receivedData[self.id].unread = 0;
 				self.socket.emit('update_ticket', {id: self.id, set: 'done=1,unread=0'});
 				self.socket.emit('new_notification', {note: 'O ticket N° '+ self.id +' foi fechado.', time: Date.now(), owner: 'Alan'});
+			}
 
-			}else{
+			else {
 
 				self.socket.emit('update_ticket', {id: self.id, set: 'done=0'});
 				self.socket.emit('new_notification', {note: 'O ticket N° '+ self.id +' foi reaberto', time: Date.now(), owner: 'Alan'});
 
 			}
 
-			window.Menu.changePage(null, window.Menu.activePage.id, true);
+			App.Menu.changePage(null, App.Menu.activePage.id, true);
 		});
 
 		commentBox.on('keydown', function (e) {
@@ -187,12 +186,9 @@
 		return all.join('');
 	}
 
-	Ticket.prototype.turnOnTheLights = function () {
-		if(this.dom.hasClass('done')) {
-			this.dom.removeClass();
-		} else {
-			this.dom.addClass('done');
-		}
+	Ticket.prototype.toggleDoneStrip = function () {
+
+		this.dom.toggleClass('done');
 	}
 
 	Ticket.prototype.prependTo = function ( element ) {

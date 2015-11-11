@@ -51,12 +51,11 @@ document.addEventListener('polymer-ready', function () {
 	});
 
 	socket.on('new_comment', function (response) {
-		console.log(response);
 		App.Toast.show(response.owner + ' comentou o ticket N° ' + response.ticketReference);
 
 		App.receivedData.filter(function (ticket) {
 			if(ticket.id == response.ticketReference) {
-				//ticket.addComment(response)
+				ticket.addComment(response);
 
 				/*if(Menu.activePage.id != (1 && 6) ) {
 					Menu.changePage(null, Menu.activePage.id ,true);
