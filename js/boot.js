@@ -11,7 +11,7 @@ goog.addDependency('core/Ticket.js', ['App.Ticket'], []);
 goog.addDependency('core/Menu.js', ['App.Menu'], []);
 goog.addDependency('core/Toast.js', ['App.Toast'], []);
 
-goog.addDependency('core/app.js', ['SocketListeners'], ['App.Menu', 'App.Ticket', 'App.Toast']);
+goog.addDependency('core/SocketListeners.js', ['SocketListeners'], ['App.Menu', 'App.Ticket', 'App.Toast']);
 
 goog.require('jQuery');
 goog.require('jQuery.Timeago');
