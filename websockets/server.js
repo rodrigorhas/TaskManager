@@ -15,7 +15,10 @@ function init(){
 	var socket = io.listen(server);
 	console.log('Waiting for connections...');
 
-	var requestUrl = 'http://localhost/TaskManagerJs/websockets/request.php';
+	var path = __dirname.split('htdocs')[1].replace(/\\/g,'/');
+	var requestUrl = 'http://localhost'+ path +'/request.php';
+
+	console.log(requestUrl + "?action=get_tickets");
 
 	function refreshDataset () {
 		najax(requestUrl + "?action=get_tickets", function(data){

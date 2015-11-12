@@ -15,7 +15,11 @@ document.addEventListener('polymer-ready', function () {
 
 		if(!response) return App.Debug.Exception('No data received - Stoping application');
 
-		App.receivedData = JSON.parse(response);
+		var json = App.Utils.parseJson(response);
+
+		if(!json) App.Debug.Exception('Invalid JSON - report this bug');
+
+		App.receivedData = json;
 
 		App.receivedData = App.receivedData.map(function ( item, index ) {
 			return new App.Ticket({

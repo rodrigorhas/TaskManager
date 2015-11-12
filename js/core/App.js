@@ -1,28 +1,24 @@
-(function (goog, App) {
+document.addEventListener('polymer-ready', function () {
+	App.LoadOverlay = {
+		_dom: $('.load-overlay'),
 
-	document.addEventListener('polymer-ready', function () {
-		App.LoadOverlay = {
-			_dom: $('.load-overlay'),
+		show: function () {
 
-			show: function () {
+			this._dom.fadeIn('slow');
+		},
 
-				this._dom.fadeIn('slow');
-			},
+		hide: function () {
 
-			hide: function () {
-
-				this._dom.fadeOut('slow');
-			}
+			this._dom.fadeOut('slow');
 		}
+	}
 
-		App.Toolbar = {
-			_dom: $('#activePageTitle'),
+	App.Toolbar = {
+		_dom: $('#activePageTitle'),
 
-			setTitle: function ( title ) {
+		setTitle: function ( title ) {
 
-				this._dom.html(title);
-			}
+			this._dom.html(title);
 		}
-	})
-
-})(goog, App);
+	}
+});
