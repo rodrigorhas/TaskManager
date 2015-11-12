@@ -1,6 +1,6 @@
 document.addEventListener('polymer-ready', function () {
 
-	var socket = io("http://localhost:8081");
+	var socket = io(App.Config.socketHost);
 
 	socket.on('connect',function() {
 

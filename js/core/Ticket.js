@@ -166,13 +166,16 @@
 	}
 
 	Ticket.prototype.toggleCardCollapse = function () {
-		this.dom.find('card-collapse').slideToggle(null, function (){
-			if($(this).css('opacity') == 0){
-				$(this).css({opacity: 1});
-				$(this).animate({
-				    scrollTop: 0
-				}, 500)
-			}else{
+
+		this.dom.find('card-collapse').slideToggle(null, function () {
+
+			if( $(this).css('opacity') == 0 ) {
+
+				$(this).animate({scrollTop: 0}, 400).css({opacity: 1});
+			}
+
+			else {
+
 				$(this).css({opacity: 0});
 			}
 		});

@@ -76,31 +76,43 @@
 
 			resolve();
 
-			if(goog.isDefAndNotNull(render) && render) {
+			this.filterTickets(targetPage)
+				.then(function (tickets) {
 
-				if(targetPage == 1){
-					RenderTickets(App.receivedData);
-					return;
-				} else if(targetPage == 6){
-					return;
-				}
-
-				var tickets = [];
-
-				App.receivedData.filter(function (obj) {
-
-					for (var filter in page.test) {
-						if(obj[filter] == page.test[filter]) {
-							tickets.push(obj);
-						}
+					if( goog.isDefAndNotNull(render) && render ) {
+						RenderTickets(tickets);
 					}
-
-					return tickets;
 				});
 
-				RenderTickets(tickets);
-			}
 		}.bind(this));
+	}
+
+	Menu.prototype.filterTickets = function ( currentPage ) {
+		var self = this;
+
+		return new Promise(function (resolve) {
+			var tickets = [];
+
+			if( currentPage == 1 ) {
+
+				resolve(App.receivedData);
+			}
+
+			else if( currentPage == 6 ) {
+				return [];
+			}
+
+			tickets = App.receivedData.filter(function (ticket) {
+
+				for (var filter in self.pages[currentPage].test) {
+					if(ticket[filter] == self.pages[currentPage].test[filter]) {
+						return ticket;
+					}
+				}
+			});
+
+			resolve(tickets);
+		});
 	}
 
 	App.Menu = new Menu();
