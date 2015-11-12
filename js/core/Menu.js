@@ -10,13 +10,17 @@
 	}
 
 	function RenderTickets (array) {
-		clearCurrentPage().then(function () {
-			for (var i = 0; i < array.length; i++) {
-				var row = array[i];
+		return new Promise (function (resolve) {
+			clearCurrentPage().then(function () {
+				for (var i = 0; i < array.length; i++) {
+					var row = array[i];
 
-				var pages = App.Menu._Page;
-				row.prependTo('section#page' + (parseInt(pages.selected, 10) + 1) + ' .container');
-			};
+					var pages = App.Menu._Page;
+					row.prependTo('section#page' + (parseInt(pages.selected, 10) + 1) + ' .container');
+				};
+
+				resolve();
+			});
 		});
 	}
 
