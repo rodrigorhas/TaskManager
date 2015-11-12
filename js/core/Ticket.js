@@ -35,17 +35,17 @@
 					<i class="text-muted">Created by ' + this.owner +', '+ $.timeago(this.creation_time.timestamp) +'</i>\
 					</small>\
 					<div class="button-group right">\
-						<paper-icon-button icon="fullscreen" ng-click="fs = !fs"></paper-icon-button>\
+						<paper-icon-button icon="fullscreen"></paper-icon-button>\
 						<paper-checkbox '+ ((this._done == 1) ? 'checked' : '') +'></paper-checkbox>\
 						<paper-menu-button>\
 						  <paper-icon-button icon="more-vert" noink></paper-icon-button>\
 						  <paper-dropdown halign="right" class="dropdown">\
 						    <core-menu class="menu">7\
 						      <paper-item>Arquivar</paper-item>\
-						      <paper-item ng-click="deleteCard(item.id, $index, $event)">Deletar</paper-item>\
+						      <paper-item>Deletar</paper-item>\
 						      <paper-item>Editar</paper-item>\
-						      <!--<paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 1">Marcar como lido</paper-item>\
-						      <paper-item ng-click="markAsRead(item.id)" ng-if="item.unread == 0">Marcar como não lido</paper-item>-->\
+						      <!--<paper-item>Marcar como lido</paper-item>\
+						      <paper-item>Marcar como não lido</paper-item>-->\
 						    </core-menu>\
 						  </paper-dropdown>\
 						</paper-menu-button>\
@@ -57,7 +57,7 @@
 				</card-body>\
 				<card-footer>\
 					<div class="button-group left">\
-						<core-icon-button icon="communication:comment" ng-click="toggleCollapse($event, item.id)"></core-icon-button>'+this.comments.length+'\
+						<core-icon-button icon="communication:comment" class="toggleComments"></core-icon-button>'+this.comments.length+'\
 						<core-icon-button icon="star-outline"></core-icon-button>4\
 					</div>\
 				</card-footer>\
@@ -72,7 +72,16 @@
 				</div>\
 			</card>');
 		
+		this._getComponents();
+
 		this.attachListeners();
+	}
+
+	Ticket.prototype._getComponents = function () {
+		this.components = {
+			commentInput: this.dom.find('#commentInput'),
+			cardCollapse: this.dom.find('card-collapse')
+		}
 	}
 
 	Ticket.prototype.done = function () {
@@ -118,9 +127,11 @@
 			commentBox.val('');
 		}
 
-		this.dom.find('core-icon-button[icon="communication:comment"]').on('click', function () {
+		this.dom.find('.toggleComments').on('click', function () {
 			if(self.comments.length > 0)
-				self.toggleCardCollapse();
+				self.toggleCardCollapse().then(function () {
+					self.focusOnCommentInput();
+				});
 		});
 
 		this.dom.find('#sendCommentButton').on('click', function () {
@@ -167,18 +178,28 @@
 
 	Ticket.prototype.toggleCardCollapse = function () {
 
-		this.dom.find('card-collapse').slideToggle(null, function () {
+		var self = this;
 
-			if( $(this).css('opacity') == 0 ) {
+		return new Promise(function (resolve) {
+			self.components.cardCollapse.slideToggle(null, function () {
 
-				$(this).animate({scrollTop: 0}, 400).css({opacity: 1});
-			}
+				if( $(this).css('opacity') == 0 ) {
 
-			else {
+					$(this).animate({ scrollTop: 0 }, {complete: resolve, duration: 400}).css({opacity: 1});
+				}
 
-				$(this).css({opacity: 0});
-			}
+				else {
+
+					$(this).css({opacity: 0});
+					resolve();
+				}
+			});
 		});
+	}
+
+	Ticket.prototype.focusOnCommentInput = function () {
+
+		this.components.commentInput.focus();
 	}
 
 	Ticket.prototype.genComments = function () {
